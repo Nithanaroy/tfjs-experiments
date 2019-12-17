@@ -20,7 +20,8 @@ function createModel() {
         loss: "categoricalCrossentropy",
         optimizer: tf.train.adam(0.003),
         metrics: ['accuracy']
-    })
+    });
+    model.summary();
     return model;
 }
 
