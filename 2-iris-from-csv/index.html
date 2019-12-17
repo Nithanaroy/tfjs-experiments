@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Iris Training from CSV</title>
+
+    <!-- Bootstrap CSS for styling the page -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="my-styles.css" />
+
+</head>
+
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/1.3.2/tf.min.js"></script>
+    <script src="model.js"></script>
+
+    <div class="container">
+        <header class="mb-5 mt-3">
+            <h2>Multi class classification on Iris flowers datatset</h2>
+            <p>You can read more about the dataset - its features and 3 types of flowers <a
+                    href="https://archive.ics.uci.edu/ml/datasets/iris" target="_blank">here</a></p>
+        </header>
+
+        <div id="alert_div" class="alert alert-info" role="alert">
+            Welcome!
+        </div>
+
+        <form>
+            <fieldset>
+                <legend>Train a Neural Network Model</legend>
+                <p>First we train a model which learns how each of Iris flowers are composed of. This downloads the
+                    dataset, transforms it and trains a neural network using Tensorflow JS.</p>
+                <button type="button" class="btn btn-primary" onclick="onStartTraininbBtnClick()">Start
+                    Training</button>
+            </fieldset>
+
+            <hr />
+
+            <fieldset>
+                <legend>Make Predictions</legend>
+                <div class="form-group col-md-4">
+                    <label for="sepal_length">Sepal Length</label>
+                    <input type="number" class="form-control" id="sepal_length" placeholder="in cm" value="5.8">
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label for="sepal_width">Sepal Width</label>
+                    <input type="number" class="form-control" id="sepal_width" placeholder="in cm" value="2.7">
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label for="petal_length">Petal Length</label>
+                    <input type="number" class="form-control" id="petal_length" placeholder="in cm" value="5.1">
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label for="petal_width">Petal Width</label>
+                    <input type="number" class="form-control" id="petal_width" placeholder="in cm" value="1.9">
+                </div>
+                <button type="button" class="btn btn-success" onclick="onPredictBtnClick()">Which flower is
+                    this?</button>
+            </fieldset>
+
+            <div id="prediction_box" class="jumbotron jumbotron-fluid mt-3 d-none">
+                <div class="container">
+                    <h1 class="display-4">The model thinks...</h1>
+                    <p class="lead">with <strong><span id="prediction_confidence_container"></span></strong> confidence
+                        that this is <strong><span id="prediction_container"></span></strong> flower.</p>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script src="view-model.js"></script>
+</body>
+
+</html>
