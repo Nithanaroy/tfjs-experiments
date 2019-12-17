@@ -50,8 +50,8 @@ function createData(irisUrl, batchSize = 10) {
         // Convert xs(features) and ys(labels) from object form (keyed by
         // column name) to array form.
         return {
-            xs: Object.values(xs),
-            ys: Object.values(ys)
+            xs: [xs.sepal_length, xs.sepal_width, xs.petal_length, xs.petal_width],
+            ys: [ys.species]
         };
     })
         .map(({

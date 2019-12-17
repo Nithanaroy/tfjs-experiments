@@ -27,7 +27,7 @@ function setAlertMsg(msg = "", type = "info") {
     if (alertObj) {
         if (isValidType) {
             // Remove every other "alert-" CSS class
-            Array.from(alertObj.classList).filter(c => !c.startsWith("alert-")).forEach(c => alertObj.classList.remove(c));
+            Array.from(alertObj.classList).filter(c => c.startsWith("alert-")).forEach(c => alertObj.classList.remove(c));
             alertObj.classList.add(newCssClass);
         }
         alertObj.innerHTML = msg;
