@@ -6,7 +6,7 @@ class DataExtra extends Data {
     constructor() {
         super();
 
-        this.state = { ...this.state, ...{ "xBuffer": null, "yBuffer": null } };
+        this.state = { ...this.state, ...{ "trainXBuffer": null, "testXBuffer": null } };
     }
 
     /**
@@ -34,8 +34,8 @@ class DataExtra extends Data {
     }
 
     async main() {
-        const dataBuffers = await super.fetchDataAndSetupState();
-        this.state = { ...this.state, ...{ "xBuffer": dataBuffers.xBuffer } };
+        const {trainXBuffer, testXBuffer} = await super.fetchDataAndSetupState();
+        this.state = { ...this.state, trainXBuffer, testXBuffer };
         return this.state;
     }
 }

@@ -5,28 +5,50 @@
 class Data {
     constructor() {
         this.state = {
-            imgsTensor: null,
+            trainX: null,
+            trainY: null,
+            testX: null,
+            testY: null,
             imgHeight: -1,
             imgWidth: -1,
-            numImages: -1
+            numTrainImages: -1,
+            numTestImages: -1,
         }
     }
 
-    parseAllImages(buffer, offset = 16, width = 28, height = 28, numImages = 60000, isBigEndianProcessor = false) {
-        let allImgData = null;
+    static parseBuffer(buffer, offset = 16, isBigEndianProcessor = false) {
+        let allData = null;
         if (isBigEndianProcessor) {
             // Let native JavaScript decode the bytes as MNIST dataset is encoded in Big Endian format 
-            allImgData = new Uint8Array(buffer, offset)
+            allData = new Uint8Array(buffer, offset)
         }
         else {
             const dataView = new DataView(buffer);
             const numBytes = dataView.byteLength - offset;
-            allImgData = new Uint8Array(numBytes);
+            allData = new Uint8Array(numBytes);
             for (let i = offset, j = 0; i < numBytes; i++ , j++) {
-                allImgData[j] = dataView.getUint8(i, isBigEndianProcessor);
+                allData[j] = dataView.getUint8(i, isBigEndianProcessor);
             }
         }
-        return tf.tensor4d(allImgData, [numImages, width, height, 1]);
+        return allData;
+    }
+
+    /**
+     * Parse all images from the buffer and return a 4D tensor of shape [num images, width, height, channels]
+     * As this is a static method, it can be used independantly with any MNIST like array buffer :)
+     * @param {ArrayBuffer} buffer Training data as an array buffer. Can be from the response of fetch()
+     * @param {int} offset Number of bytes to ignore from the beginning to start parsing for input data
+     * @param {int} width width of each image in pixels
+     * @param {int} height height of each image in pixels
+     * @param {int} numImages total number of training examples in the buffer
+     * @param {bool} isBigEndianProcessor endiannes of the machine is needed to read the raw bytes
+     */
+    static parseAllImages(buffer, offset = 16, width = 28, height = 28, numImages = 60000, isBigEndianProcessor = false) {
+        return tf.tensor4d(Data.parseBuffer(buffer, offset, isBigEndianProcessor), [numImages, width, height, 1]);
+    }
+
+    static parseAllLabels(buffer, offset = 8, isBigEndianProcessor = false) {
+        return tf.tensor1d(Data.parseBuffer(buffer, offset, isBigEndianProcessor));
     }
 
     /**
@@ -45,23 +67,41 @@ class Data {
      * Returns the downloaded data as array buffers
      */
     async fetchDataAndSetupState() {
-        const r = await fetch("data/train-images-idx3-ubyte");
-        const b = await r.arrayBuffer();
-        const dv = new DataView(b)
+        const trainXReq = fetch("data/train-images-idx3-ubyte");
+        const trainYReq = fetch("data/train-labels-idx1-ubyte");
+        const testXReq = fetch("data/t10k-images-idx3-ubyte");
+        const testYReq = fetch("data/t10k-labels-idx1-ubyte");
 
+        // Parse Train X
+        const trainXBuffer = await (await trainXReq).arrayBuffer();
+        let dv = new DataView(trainXBuffer)
         // Decode bytes as mentioned in "FILE FORMATS FOR THE MNIST DATABASE" section in http://yann.lecun.com/exdb/mnist/
         const isBigEndianProcessor = !this.checkIfLittleEndianProcessor();
         const magicNumber = dv.getInt32(0, isBigEndianProcessor);
-        const numImages = dv.getInt32(4, isBigEndianProcessor);
+        const numTrainImages = dv.getInt32(4, isBigEndianProcessor);
         const imgWidth = dv.getInt32(8, isBigEndianProcessor);
         const imgHeight = dv.getInt32(12, isBigEndianProcessor);
+        this.state.trainX = Data.parseAllImages(trainXBuffer, 16, imgWidth, imgHeight, numTrainImages, isBigEndianProcessor);
 
-        this.state.imgsTensor = this.parseAllImages(b, 16, imgWidth, imgHeight, numImages, isBigEndianProcessor);
-        this.state = { ...this.state, numImages, imgWidth, imgHeight };
+        // Parse Test X
+        const testXBuffer = await (await testXReq).arrayBuffer();
+        dv = new DataView(testXBuffer);
+        const numTestImages = dv.getInt32(4, isBigEndianProcessor);
+        this.state.testX = Data.parseAllImages(testXBuffer, 16, imgWidth, imgHeight, numTestImages, isBigEndianProcessor);
+        
+        // Parse Train Y
+        const trainYBuffer = await (await trainYReq).arrayBuffer();
+        dv = new DataView(trainYBuffer);
+        this.state.trainY = Data.parseAllLabels(trainYBuffer, 8, isBigEndianProcessor);
+        
+        // Parse Test Y
+        const testYBuffer = await (await testYReq).arrayBuffer();
+        dv = new DataView(testYBuffer);
+        this.state.testY = Data.parseAllLabels(testYBuffer, 8, isBigEndianProcessor);
+
+        this.state = { ...this.state, imgWidth, imgHeight, numTrainImages, numTestImages };
 
         console.debug("Downloaded");
-        return {
-            xBuffer: b
-        }
+        return { trainXBuffer, testXBuffer }
     }
 }

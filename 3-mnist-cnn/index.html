@@ -25,14 +25,17 @@
                             Test 1
                         </div>
                         <div class="card-body">
-                            <h5 class="card-title">Test parsing a single image</h5>
-                            <p class="card-text">This downloads the dataset if not already done, parses only a single
-                                random image from it. This way we can ensure the parsing logic of the dataset is
+                            <h5 class="card-title">Test parsing a single image & label</h5>
+                            <p class="card-text">This downloads the dataset if not already done and parses only a single
+                                random image & its label from it on request. This way we can ensure the parsing logic of
+                                the dataset is
                                 accurate.</p>
                         </div>
                         <div class="card-footer">
                             <button type="button" class="btn btn-primary"
-                                onclick="showRandomImageOneOff()">Parse Image</button>
+                                onclick="showRandomExampleOneOff('train')">Parse Train Example</button>
+                            <button type="button" class="btn btn-primary"
+                                onclick="showRandomExampleOneOff('test')">Parse Test Example</button>
                         </div>
                     </div>
                 </div>
@@ -49,7 +52,10 @@
                                 can ensure parsing and training data creation logic.</p>
                         </div>
                         <div class="card-footer">
-                            <button type="button" class="btn btn-primary" onclick="showRandomImage()">Parse Image</button>
+                            <button type="button" class="btn btn-primary" onclick="showRandomExample('train')">Parse
+                                Train Example</button>
+                            <button type="button" class="btn btn-primary" onclick="showRandomExample('test')">Parse
+                                Test Example</button>
                         </div>
                     </div>
                 </div>
