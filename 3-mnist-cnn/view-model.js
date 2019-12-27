@@ -8,7 +8,14 @@ let state = {
     numTrainImages: -1,
     numTestImages: -1,
     imgHeight: -1,
-    imgWidth: -1
+    imgWidth: -1,
+    visionModel: null,
+    alertObj: null,
+    inferenceManager: null
+}
+
+function init() {
+    state.alertObj = new Alert(document.getElementById("alert_div"));
 }
 
 function showImageFromImageData(canvasId, imageData) {
@@ -26,7 +33,7 @@ function showImageFromTensor(canvasId, imgsTensor, imgIndex) {
  * Parses only the image asked for everytime on click
  * @param {string} type One of "train" or "test" to indicate the source dataset to sample from
  */
-async function showRandomExampleOneOff(type="train") {
+async function showRandomExampleOneOff(type = "train") {
     if (!state.trainXBuffer || !state.testXBuffer) {
         const dataModel = new DataExtra();
         const newState = await dataModel.main();
@@ -38,7 +45,7 @@ async function showRandomExampleOneOff(type="train") {
     const dv = new DataView(X);
     const offset = (imageIndex * state.imgHeight * state.imgWidth) + 16
     const { imageData, imgTensor } = DataExtra.parseBytesAsImage(dv, offset, state.imgWidth, state.imgHeight)
-    
+
     showImageFromImageData("testImageCanvas", imageData);
     document.getElementById("textContainer").innerHTML = `Showing example ${imageIndex} of ${dataSize} whose label is ${y.slice(imageIndex, 1).arraySync()}`;
 }
@@ -60,3 +67,31 @@ async function showRandomExample(type = "train") {
     showImageFromTensor("testImageCanvas", X, imageIndex);
     document.getElementById("textContainer").innerHTML = `Showing example ${imageIndex} of ${dataSize} whose label is ${y.slice(imageIndex, 1).arraySync()}`;
 }
+
+function train() {
+    if (!state.visionModel) {
+        state.visionModel = new VisionModel(document.getElementById("tensorboard"));
+    }
+    state.alertObj.showMsg("Created a model", "success");
+    state.visionModel.run().then(trainingHistory => {
+        setUpInference();
+        state.alertObj.showMsg("Successfully trained the model. Try it with your own writing", "success");
+    }, e => {
+        state.alertObj.showMsg("Unable to train. Check browser console for more details", "danger");
+        console.error(e);
+    });
+    state.alertObj.showMsg("Training session in progress...", "success");
+}
+
+function setUpInference() {
+    if (!state.inferenceManager) {
+        // Inference can be done only after the model has been trained at least once.
+        state.inferenceManager = new ModelInference({
+            visionModel: state.visionModel,
+            imgWidth: state.visionModel.dataBunch.state.imgWidth,
+            imgHeight: state.visionModel.dataBunch.state.imgHeight
+        });
+    }
+}
+
+init();

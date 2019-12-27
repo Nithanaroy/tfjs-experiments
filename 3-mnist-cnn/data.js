@@ -16,6 +16,18 @@ class Data {
         }
     }
 
+    get trainX() { return this.state.trainX; }
+    get testX() { return this.state.testX; }
+    get trainY() { return this.state.trainY; }
+    get testY() { return this.state.testY; }
+    get numTrainImages() { return this.state.numTrainImages; }
+    get numTestImages() { return this.state.numTestImages; }
+
+    set trainX(newVal) { this.state.trainX = newVal; }
+    set testX(newVal) { this.state.testX = newVal; }
+    set trainY(newVal) { this.state.trainY = newVal; }
+    set testY(newVal) { this.state.testY = newVal; }
+    
     static parseBuffer(buffer, offset = 16, isBigEndianProcessor = false) {
         let allData = null;
         if (isBigEndianProcessor) {
@@ -88,12 +100,12 @@ class Data {
         dv = new DataView(testXBuffer);
         const numTestImages = dv.getInt32(4, isBigEndianProcessor);
         this.state.testX = Data.parseAllImages(testXBuffer, 16, imgWidth, imgHeight, numTestImages, isBigEndianProcessor);
-        
+
         // Parse Train Y
         const trainYBuffer = await (await trainYReq).arrayBuffer();
         dv = new DataView(trainYBuffer);
         this.state.trainY = Data.parseAllLabels(trainYBuffer, 8, isBigEndianProcessor);
-        
+
         // Parse Test Y
         const testYBuffer = await (await testYReq).arrayBuffer();
         dv = new DataView(testYBuffer);
@@ -101,7 +113,7 @@ class Data {
 
         this.state = { ...this.state, imgWidth, imgHeight, numTrainImages, numTestImages };
 
-        console.debug("Downloaded");
+        console.debug("Processed data");
         return { trainXBuffer, testXBuffer }
     }
 }
