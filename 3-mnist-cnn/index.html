@@ -26,14 +26,14 @@
         <div id="alert_div" class="alert alert-info" role="alert">Welcome!</div>
 
         <div class="mt-4">
-            <h5>Test Data Preparation</h5>
+            <h5>Test, Data Preparation</h5>
             <p class="mb-3">As this is a web app, downloading 1000s of training examples individually is not an option,
                 unlike in Python Tensorflow. Luckily MNIST images dataset is available as a single binary file in its
                 original form <a href="http://yann.lecun.com/exdb/mnist/" target="_blank"
                     rel="noopener noreferrer">here</a>. The interesting part of this project is how we parse this giant
                 binary file and prepare the training tensors. This is surprisingly simple in JavaScript using <a
                     href="https://javascript.info/arraybuffer-binary-arrays" target="_blank"
-                    rel="noopener noreferrer">Typed Arrays</a>.</p>
+                    rel="noopener noreferrer">Typed Arrays</a>. Checkout the 2 tests below, which validate training data preparation.</p>
             <canvas id="testImageCanvas" style="border: solid 2px aquamarine"></canvas>
             <p id="textContainer"></p>
 
@@ -85,7 +85,7 @@
 
         <div>
             <h5>Train</h5>
-            <p class="mb-3">TODO</p>
+            <p class="mb-3">Train a neural network which takes these raw image tensors and learns to classify into one of 0 to 9 digits.</p>
             <button type="button" class="btn btn-success" onclick="train()">Start Training</button>
             <div id="tensorboard" class="mt-3"></div>
         </div>
@@ -94,7 +94,7 @@
 
         <div>
             <h5>Inference</h5>
-            <p class="mb-3">Test your trained model with your own hand writing</p>
+            <p class="mb-3">Test your trained model with your own hand writing. This is available only after training a model.</p>
 
             <div class="card mb-3">
                 <div class="d-flex">
@@ -124,7 +124,7 @@
                     </div>
                 </div>
             </div>
-            <div class="">
+            <div class="d-none">
                 <img id="img_placeholder" style="width:280px; height:280px;background: #000;">
                 <p>This is the image that is fed as input to model to predict</p>
             </div>
@@ -132,6 +132,7 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/1.3.2/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
+    <script src="https://unpkg.com/comlink@alpha/dist/umd/comlink.js"></script>
     <script src="alert.js"></script>
     <script src="data.js"></script>
     <script src="data-extra.js"></script>

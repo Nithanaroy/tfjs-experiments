@@ -71,10 +71,8 @@ class ModelInference {
     }
 
     async predict() {
-        const raw = tf.browser.fromPixels(self.rawImage, 1);
-        const resized = tf.image.resizeBilinear(raw, [self.imgWidth, self.imgHeight]);
-        const tensor = resized.expandDims(0);
-        const predictionProbs = self.visionModel.model.predict(tensor);
+        const raw = tf.browser.fromPixels(self.rawImage, 1).arraySync();
+        const predictionProbs = await self.visionModel.predict(raw, self.imgWidth, self.imgHeight);
         const [prediction, confidence] = [tf.argMax(predictionProbs, 1).arraySync(), tf.max(predictionProbs, 1).arraySync()];
 
         console.debug(`Probabilities for each class: ${predictionProbs}`);

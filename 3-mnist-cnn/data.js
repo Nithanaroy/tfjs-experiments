@@ -90,16 +90,16 @@ class Data {
         // Decode bytes as mentioned in "FILE FORMATS FOR THE MNIST DATABASE" section in http://yann.lecun.com/exdb/mnist/
         const isBigEndianProcessor = !this.checkIfLittleEndianProcessor();
         const magicNumber = dv.getInt32(0, isBigEndianProcessor);
-        const numTrainImages = dv.getInt32(4, isBigEndianProcessor);
-        const imgWidth = dv.getInt32(8, isBigEndianProcessor);
-        const imgHeight = dv.getInt32(12, isBigEndianProcessor);
-        this.state.trainX = Data.parseAllImages(trainXBuffer, 16, imgWidth, imgHeight, numTrainImages, isBigEndianProcessor);
+        this.state.numTrainImages = dv.getInt32(4, isBigEndianProcessor);
+        this.state.imgWidth = dv.getInt32(8, isBigEndianProcessor);
+        this.state.imgHeight = dv.getInt32(12, isBigEndianProcessor);
+        this.state.trainX = Data.parseAllImages(trainXBuffer, 16, this.state.imgWidth, this.state.imgHeight, this.numTrainImages, isBigEndianProcessor);
 
         // Parse Test X
         const testXBuffer = await (await testXReq).arrayBuffer();
         dv = new DataView(testXBuffer);
-        const numTestImages = dv.getInt32(4, isBigEndianProcessor);
-        this.state.testX = Data.parseAllImages(testXBuffer, 16, imgWidth, imgHeight, numTestImages, isBigEndianProcessor);
+        this.state.numTestImages = dv.getInt32(4, isBigEndianProcessor);
+        this.state.testX = Data.parseAllImages(testXBuffer, 16, this.state.imgWidth, this.state.imgHeight, this.numTestImages, isBigEndianProcessor);
 
         // Parse Train Y
         const trainYBuffer = await (await trainYReq).arrayBuffer();
@@ -110,8 +110,6 @@ class Data {
         const testYBuffer = await (await testYReq).arrayBuffer();
         dv = new DataView(testYBuffer);
         this.state.testY = Data.parseAllLabels(testYBuffer, 8, isBigEndianProcessor);
-
-        this.state = { ...this.state, imgWidth, imgHeight, numTrainImages, numTestImages };
 
         console.debug("Processed data");
         return { trainXBuffer, testXBuffer }
