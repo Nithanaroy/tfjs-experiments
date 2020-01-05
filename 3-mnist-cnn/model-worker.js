@@ -1,4 +1,6 @@
-importScripts("https://cdnjs.cloudflare.com/ajax/libs/tensorflow/1.3.2/tf.min.js", "https://unpkg.com/comlink@alpha/dist/umd/comlink.js", "data.js")
+importScripts("https://cdnjs.cloudflare.com/ajax/libs/tensorflow/1.3.2/tf.min.js", "https://unpkg.com/comlink/dist/umd/comlink.js", "constants.js", "data.js");
+
+window = globalThis;
 
 class VisionModelWorker {
 
@@ -7,7 +9,7 @@ class VisionModelWorker {
         this.dataBunch = null;
         this.trainingHistories = [];
     }
-    create() {
+    async create(saveToLocalStorage = false) {
         this.model = tf.sequential();
 
         this.model.add(tf.layers.conv2d({ inputShape: [28, 28, 1], kernelSize: 3, filters: 8, activation: 'relu' }));
@@ -21,7 +23,9 @@ class VisionModelWorker {
         this.model.compile({ optimizer: tf.train.adam(), loss: 'categoricalCrossentropy', metrics: ['accuracy'] });
         this.model.summary();
 
-        return this.model;
+        if (saveToLocalStorage) {
+            await this.model.save(Constants.MODEL_DISK_PATH());
+        }
     }
     async getData(forceFetch = false) {
         if (!!this.dataBunch && !forceFetch) {
@@ -48,7 +52,7 @@ class VisionModelWorker {
 
     async run(batchSize = 1024, epochs = 1, trainExisting = true, onBatchEndCb = null, onEpochEndCb = null) {
         if (!this.model || !trainExisting) {
-            this.create();
+            await this.create();
         }
         await this.getData();
         const vizCallbacks = {
