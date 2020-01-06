@@ -14,6 +14,7 @@ class ModelInference {
         self.canvas = document.getElementById(canvasId);
         self.rawImage = document.getElementById(imgPlaceholderId);
         self.ctx = self.canvas.getContext("2d");
+        self.predictBtn = document.getElementById("predictBtn")
 
         self.canvas.addEventListener("mousedown", self.setLastCoords); // fires before mouse left btn is released
         self.canvas.addEventListener("mousemove", self.freeForm);
@@ -22,7 +23,7 @@ class ModelInference {
 
         self.addRequiredCanvasStyles(Math.max(imgWidth * 10, 280), Math.max(imgHeight * 10, 280));
 
-        document.getElementById("predictBtn").addEventListener("click", self.predict);
+        self.predictBtn.addEventListener("click", self.predictBtnOnClick);
         document.getElementById("clearBtn").addEventListener("click", self.erase);
     }
 
@@ -70,6 +71,11 @@ class ModelInference {
         self.rawImage.removeAttribute("src");
     }
 
+    predictBtnOnClick() {
+        self.predictBtn.disabled = true;
+        self.predict().finally(() => self.predictBtn.disabled = false);
+    }
+
     async predict() {
         const raw = tf.browser.fromPixels(self.rawImage, 1).arraySync();
         const predictionProbs = await self.visionModel.predict(raw, self.imgWidth, self.imgHeight);
@@ -78,6 +84,7 @@ class ModelInference {
         console.debug(`Probabilities for each class: ${predictionProbs}`);
         document.getElementById("prediction_confidence_container").innerHTML = (confidence * 100).toFixed(2);
         document.getElementById("prediction_container").innerHTML = prediction;
+        document.getElementById("predictionDiv").classList.remove("d-none");
 
         return { prediction, confidence };
     }

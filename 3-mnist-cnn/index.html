@@ -33,7 +33,8 @@
                     rel="noopener noreferrer">here</a>. The interesting part of this project is how we parse this giant
                 binary file and prepare the training tensors. This is surprisingly simple in JavaScript using <a
                     href="https://javascript.info/arraybuffer-binary-arrays" target="_blank"
-                    rel="noopener noreferrer">Typed Arrays</a>. Checkout the 2 tests below, which validate training data preparation.</p>
+                    rel="noopener noreferrer">Typed Arrays</a>. Checkout the 2 tests below, which validate training data
+                preparation.</p>
             <canvas id="testImageCanvas" style="border: solid 2px aquamarine"></canvas>
             <p id="textContainer"></p>
 
@@ -51,10 +52,8 @@
                                 accurate.</p>
                         </div>
                         <div class="card-footer">
-                            <button type="button" class="btn btn-primary"
-                                onclick="showRandomExampleOneOff('train')">Parse Train Example</button>
-                            <button type="button" class="btn btn-primary ml-3"
-                                onclick="showRandomExampleOneOff('test')">Parse Test Example</button>
+                            <button type="button" id="parseTrainImageBtn" class="btn btn-primary">Parse Train Example</button>
+                            <button type="button" id="parseTestImageBtn" class="btn btn-primary ml-3">Parse Test Example</button>
                         </div>
                     </div>
                 </div>
@@ -71,10 +70,8 @@
                                 can ensure parsing and training data creation logic.</p>
                         </div>
                         <div class="card-footer">
-                            <button type="button" class="btn btn-primary" onclick="showRandomExample('train')">Parse
-                                Train Example</button>
-                            <button type="button" class="btn btn-primary ml-3" onclick="showRandomExample('test')">Parse
-                                Test Example</button>
+                            <button type="button" id="parseTrainDataBtn" class="btn btn-primary">Parse Train Example</button>
+                            <button type="button" id="parseTestDataBtn" class="btn btn-primary ml-3">Parse Test Example</button>
                         </div>
                     </div>
                 </div>
@@ -85,8 +82,42 @@
 
         <div>
             <h5>Train</h5>
-            <p class="mb-3">Train a neural network which takes these raw image tensors and learns to classify into one of 0 to 9 digits.</p>
-            <button type="button" class="btn btn-success" onclick="train()">Start Training</button>
+            <p class="mb-3">Train a neural network which learns to identify raw images as one of 0 to 9 digits.</p>
+            <p>As training is a compute intensive task, we use web workers for it and keep the main thread available for
+                visualizations and to handle user actions. <a href="https://github.com/GoogleChromeLabs/comlink"
+                    target="_blank" rel="noopener noreferrer">Comlink</a> library is used to manage the communication
+                between
+                main and worker threads. This way, all the model code runs in a worker thread while training visualizations
+                are managed by the main thread. This is something new to learn from in this module and can be found in
+                <a href="https://github.com/Nithanaroy/tfjs-experiments/blob/master/3-mnist-cnn/model.js"
+                    target="_blank" rel="noopener noreferrer">model.js</a> and
+                <a href="https://github.com/Nithanaroy/tfjs-experiments/blob/master/3-mnist-cnn/model-worker.js"
+                    target="_blank" rel="noopener noreferrer">model-worker.js</a> files</p>
+
+            <form id="trainingForm">
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="batchSizeTb">Batch Size</label>
+                        <input type="number" min="1" class="form-control" id="batchSizeTb"
+                            placeholder="Number of images to train at once" value="1024">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="epochsTb">Epochs</label>
+                        <input type="number" min="1" class="form-control" id="epochsTb"
+                            placeholder="Number of iterations to go over the entire dataset" value="1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="createNewCb">
+                        <label class="form-check-label" for="createNewCb">
+                            Discard any existing models and create a new one?
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" id="startTrainingBtn" class="btn btn-success">Start Training</button>
+            </form>
+
             <div id="tensorboard" class="mt-3"></div>
         </div>
 
@@ -94,7 +125,8 @@
 
         <div>
             <h5>Inference</h5>
-            <p class="mb-3">Test your trained model with your own hand writing. This is available only after training a model.</p>
+            <p class="mb-3">Test your trained model with your own hand writing. This is available only after training a
+                model.</p>
 
             <div class="card mb-3">
                 <div class="d-flex">
@@ -105,15 +137,16 @@
                     <div class="flex-grow-1">
                         <div class="card-body">
                             <h5 class="card-title">Draw a digit</h5>
-                            <p class="card-text">Use your pointer to draw a digit on the surface to see how well the
+                            <p class="card-text">Use your pointer to draw a digit on the surface and see how well the
                                 model recognizes it.</p>
                         </div>
                         <div class="card-footer">
-                            <button type="button" id="predictBtn" class="btn btn-primary mr-1">Identify the digit</button>
+                            <button type="button" id="predictBtn" class="btn btn-primary mr-1">Identify the
+                                digit</button>
                             <button type="button" id="clearBtn" class="btn btn-warning ml-1">Clear my
                                 art</button>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body d-none" id="predictionDiv">
                             <div class="card-text">
                                 <h5>The model thinks...</h5> with <strong><span
                                         id="prediction_confidence_container"></span></strong>% confidence that this is

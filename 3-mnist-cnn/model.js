@@ -1,5 +1,5 @@
 /**
- * Use Comlink to trigger all the model functions in a web worker
+ * Uses Comlink to trigger all the model functions in a web worker
  */
 
 function callback(batch, logs) {
@@ -25,7 +25,7 @@ class VisionModel {
     get imgWidth() {
         return this.visionModelWorker.dataBunch.state.imgHeight
     }
-    async run(batchSize = 1024, epochs = 1, trainExisting = true) {
+    async run({ batchSize = 1024, epochs = 1, trainExisting = true } = {}) {
         if (!this.visionModelWorker) { await this.init(); }
         const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
 

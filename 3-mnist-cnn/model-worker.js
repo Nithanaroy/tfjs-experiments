@@ -1,13 +1,17 @@
+/**
+ * All the model code that is run in a web worker and is Comlink compliant
+ */
+
 importScripts("https://cdnjs.cloudflare.com/ajax/libs/tensorflow/1.3.2/tf.min.js", "https://unpkg.com/comlink/dist/umd/comlink.js", "constants.js", "data.js");
 
-window = globalThis;
+window = globalThis; // window object is needed by tfjs for saving the model to  disk
 
 class VisionModelWorker {
 
     constructor() {
-        this.model = null;
-        this.dataBunch = null;
-        this.trainingHistories = [];
+        this.model = null; // holds tfjs model
+        this.dataBunch = null; // holds the X and y datasets
+        this.trainingHistories = []; // holds the logs of training results
     }
     async create(saveToLocalStorage = false) {
         this.model = tf.sequential();

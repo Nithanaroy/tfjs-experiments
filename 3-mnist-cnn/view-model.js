@@ -6,8 +6,28 @@ let state = {
     inferenceViewModel: null
 }
 
+const trainImgBtn = document.getElementById("parseTrainImageBtn");
+const testImgBtn = document.getElementById("parseTestImageBtn");
+const trainDataBtn = document.getElementById("parseTrainDataBtn");
+const testDataBtn = document.getElementById("parseTestDataBtn");
+const testDataPrepBtns = [trainImgBtn, testImgBtn, trainDataBtn, testDataBtn];
+
 function init() {
     state.alertObj = new Alert(document.getElementById("alert_div"));
+
+    trainImgBtn.addEventListener('click', ev => showExampleOneOffOnClick(ev, "train"));
+    testImgBtn.addEventListener('click', ev => showExampleOneOffOnClick(ev, "test"));
+    trainDataBtn.addEventListener('click', ev => showExampleOnClick(ev, "train"));
+    testDataBtn.addEventListener('click', ev => showExampleOnClick(ev, "test"));
+
+    document.getElementById("predictBtn").addEventListener('click', ev => noModelForInferenceWarning());
+    document.getElementById("clearBtn").addEventListener('click', ev => noModelForInferenceWarning());
+}
+
+function noModelForInferenceWarning() {
+    if (!state.visionModel) {
+        state.alertObj.showMsg("Train a model first to use inference options", "warning");        
+    }
 }
 
 function showImageFromImageData(canvasId, imageData) {
@@ -42,6 +62,11 @@ async function showRandomExampleOneOff(type = "train") {
     document.getElementById("textContainer").innerHTML = `Showing example ${imageIndex} of ${dataSize} whose label is ${y.slice(imageIndex, 1).arraySync()}`;
 }
 
+function showExampleOneOffOnClick(ev, type) {
+    testDataPrepBtns.forEach(el => el.disabled = true);
+    showRandomExampleOneOff(type).finally(() => testDataPrepBtns.forEach(el => el.disabled = false));
+}
+
 /**
  * Parses all data in the first call and computes in-memory for the subsequent clicks
  * Useful when you expect user clicks multiple times
@@ -61,14 +86,18 @@ async function showRandomExample(type = "train") {
     document.getElementById("textContainer").innerHTML = `Showing example ${imageIndex} of ${dataSize} whose label is ${y.slice(imageIndex, 1).arraySync()}`;
 }
 
+function showExampleOnClick(ev, type) {
+    testDataPrepBtns.forEach(el => el.disabled = true);
+    showRandomExample(type).finally(() => testDataPrepBtns.forEach(el => el.disabled = false));
+}
+
 async function train() {
     if (!state.visionModel) {
         state.visionModel = new VisionModel(document.getElementById("tensorboard"));
-        // state.visionModel = await new VisionModel(null);
     }
     const t0 = performance.now();
-    state.alertObj.showMsg("Created a model", "success");
-    state.visionModel.run().then(async trainingHistory => {
+    state.alertObj.showMsg("Training session is in progress...", "info");
+    return state.visionModel.run(parseForm()).then(trainingHistory => {
         setUpInference();
         const t1 = performance.now();
         state.alertObj.showMsg(`Successfully trained the model in ${Math.round(t1 - t0)}ms. Try it with your own writing`, "success");
@@ -76,7 +105,14 @@ async function train() {
         state.alertObj.showMsg("Unable to train. Check browser console for more details", "danger");
         console.error(e);
     });
-    state.alertObj.showMsg("Training session is in progress...", "info");
+}
+
+function parseForm() {
+    return {
+        batchSize: parseInt(document.getElementById("batchSizeTb").value) || 1024,
+        epochs: parseInt(document.getElementById("epochsTb").value) || 1,
+        trainExisting: !document.getElementById("createNewCb").checked || false
+    }
 }
 
 async function setUpInference() {
@@ -87,5 +123,12 @@ async function setUpInference() {
         imgHeight: await state.visionModel.imgHeight
     });
 }
+
+document.getElementById("trainingForm").addEventListener('submit', function (e) {
+    e.preventDefault();
+    const startTrainingBtn = document.getElementById("startTrainingBtn");
+    startTrainingBtn.disabled = true;
+    train().finally(() => startTrainingBtn.disabled = false);
+});
 
 init();
