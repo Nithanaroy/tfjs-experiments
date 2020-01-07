@@ -2,6 +2,10 @@
 
 In this submodule, MNIST binary dataset is downloaded from its creator's site, parsed and trained completely in JavaScript. This data processing script is the unique piece of the module and can be found in [data.js](data.js) file.This is a much simpler to understand implementation than the [one](https://github.com/lmoroney/dlaicourse/blob/master/TensorFlow%20Deployment/Course%201%20-%20TensorFlow-JS/Week%202/Examples/data.js) from [Browser based models with Tensorflow.js](https://www.coursera.org/learn/browser-based-models-tensorflow/home/welcome) course.
 
+See the code in action,
+
+[![Working Demo](https://img.youtube.com/vi/m_VLpF_U0DM/0.jpg)](https://youtu.be/m_VLpF_U0DM "Multiclass Image Classification Training & Inference in Tensorflow JS")
+
 This is tested in Chrome 79
 
 ## Setup
